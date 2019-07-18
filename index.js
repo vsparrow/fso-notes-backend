@@ -14,6 +14,7 @@ const requestLogger = (req, res, next) => {
 //END middleware definitions
 
 //START call middleware
+app.use(express.static('build'));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(requestLogger);
