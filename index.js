@@ -30,6 +30,14 @@ const noteSchema = new mongoose.Schema({
 	date: Date,
 	important: Boolean,
 })
+//set schema so that the id is flat else it is an object, remove unneeded items
+noteSchema.set('toJSON',{
+	transform: (document, returnedObject)=>{
+		returnedObject.id = returnedObject._id.toString()
+		delete returnedObject._id
+		delete returnedObject.__v
+	}
+})
 const Note = mongoose.model('Note', noteSchema)
 //END mongoose definitions 
 
@@ -77,7 +85,8 @@ app.get('/api/notes/:id', (req, res) => {
 app.get('/api/notes', (req, res) => {
     // res.json(notes); //OLD
 	Note.find({}).then(notes=>{
-		res.json(notes)
+		// res.json(notes) //old
+		res.json(notes.map(note => note.toJSON())) 
 	})
 });
 
