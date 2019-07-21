@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const {mongopassword} = require('./password')
 
 //START middleware definitions
 const bodyParser = require('body-parser');
@@ -19,6 +20,18 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(requestLogger);
 //END call middleware
+
+//START mongoose definitions 
+const mongoose = require('mongoose')
+const url = `mongodb+srv://fullstack:${mongopassword}@cluster0-mzgxn.mongodb.net/note-app?retryWrites=true&w=majority`
+mongoose.connect(url, {useNewUrlParser: true})
+const noteSchema = new mongoose.Schema({
+	content: String,
+	date: Date,
+	important: Boolean,
+})
+const Note = mongoose.model('Note', noteSchema)
+//END mongoose definitions 
 
 const generateId = () => {
     const maxID = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0;
@@ -62,7 +75,10 @@ app.get('/api/notes/:id', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-    res.json(notes);
+    // res.json(notes); //OLD
+	Note.find({}).then(notes=>{
+		res.json(notes)
+	})
 });
 
 app.delete('/api/notes/:id', (req, res) => {
