@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const {mongopassword} = require('./password')
+
 
 //START middleware definitions
 const bodyParser = require('body-parser');
@@ -23,22 +25,34 @@ app.use(requestLogger);
 
 //START mongoose definitions 
 const mongoose = require('mongoose')
-const url = `mongodb+srv://fullstack:${mongopassword}@cluster0-mzgxn.mongodb.net/note-app?retryWrites=true&w=majority`
-mongoose.connect(url, {useNewUrlParser: true})
-const noteSchema = new mongoose.Schema({
-	content: String,
-	date: Date,
-	important: Boolean,
-})
-//set schema so that the id is flat else it is an object, remove unneeded items
-noteSchema.set('toJSON',{
-	transform: (document, returnedObject)=>{
-		returnedObject.id = returnedObject._id.toString()
-		delete returnedObject._id
-		delete returnedObject.__v
-	}
-})
-const Note = mongoose.model('Note', noteSchema)
+const Note = require('./models/note')
+// const url = `mongodb+srv://fullstack:${mongopassword}@cluster0-mzgxn.mongodb.net/note-app?retryWrites=true&w=majority`
+// const url = process.env.MONGODB_URI
+// console.log('connecting to ',url)
+
+// mongoose.connect(url, {useNewUrlParser: true})
+// .then(result => {
+//     console.log('connected to MongoDB')
+//   })
+//   .catch((error) => {
+//     console.log('error connecting to MongoDB:', error.message)
+//   })
+
+// //note sure if need below
+// const noteSchema = new mongoose.Schema({
+// 	content: String,
+// 	date: Date,
+// 	important: Boolean,
+// })
+// //set schema so that the id is flat else it is an object, remove unneeded items
+// noteSchema.set('toJSON',{
+// 	transform: (document, returnedObject)=>{
+// 		returnedObject.id = returnedObject._id.toString()
+// 		delete returnedObject._id
+// 		delete returnedObject.__v
+// 	}
+// })
+// const Note = mongoose.model('Note', noteSchema)
 //END mongoose definitions 
 
 const generateId = () => {
