@@ -14,6 +14,17 @@ const requestLogger = (req, res, next) => {
     console.log('----');
     next();
 };
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' });
+};
+const errorHandler = (error, request, response, next) => {
+	console.log(error.message)
+	if(error.name === 'CastError' && error.kind === 'ObjectId') {
+		return response.status(400).send({error: 'malformatted id'})
+	}
+	next(error)
+}
+
 //END middleware definitions
 
 //START call middleware
@@ -21,31 +32,39 @@ app.use(express.static('build'));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(requestLogger);
+
 //END call middleware
 
 //START mongoose definitions 
 const mongoose = require('mongoose')
 const Note = require('./models/note')
+// let ObjectId = mongoose.Types.ObjectId //to cast ID from requ.body.id
 
 const generateId = () => {
     const maxID = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0;
     return maxID + 1;
 };
 
-
+//unneeded after using frontend build
 app.get('/', (req, res) => {
     res.send('<h1>Hello World</h1>');
 });
 
-app.get('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const note = notes.find(note => note.id === id);
-
-    if (note) {
-        return res.json(note);
-    } else {
-        return res.status(404).end();
-    }
+app.get('/api/notes/:id', (req, res, next) => {
+    // const id = new ObjectId(req.params.id);
+    const id =  (req.params.id);
+    // const note = notes.find(note => note.id === id);
+	Note.findById(id)
+	.then(note => {
+		if(note){	res.json(note.toJSON()) }
+		else { res.status(204).end()}
+	})
+	// .catch(error => {
+	// 	console.log(error)
+	// 	res.status(400).send({error: 'malformatted id'})	
+	// })
+	//If the next function is called with a parameter, then the execution will continue to the error handler middleware.
+	.catch(error => next(error))
 });
 
 app.get('/api/notes', (req, res) => {
@@ -86,10 +105,9 @@ app.post('/api/notes', (req, res) => {
 }); //post
 
 //START after routes middleware
-const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: 'unknown endpoint' });
-};
+
 app.use(unknownEndpoint);
+app.use(errorHandler)
 //END after routes middleware
 
 //////////////////////////////////////
