@@ -107,6 +107,17 @@ app.post('/api/notes', (req, res) => {
 	})
 }); //post
 
+app.put('/api/notes/:id',(request,response,next)=>{
+	const body = request.body
+	const note = {
+		content: body.content, 
+		important: body.important
+	}
+	Note.findByIdAndUpdate(request.params.id,note,{new:true})
+	.then(updatedNote => response.json(updatedNote.toJSON()))
+	.catch(error=>next(error))
+})
+
 //START after routes middleware
 
 app.use(unknownEndpoint);
