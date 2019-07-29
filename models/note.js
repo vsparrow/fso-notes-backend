@@ -1,4 +1,7 @@
 const mongoose = require('mongoose')
+//below added for https://mongoosejs.com/docs/deprecations.html
+mongoose.set('useFindAndModify', false)
+
 const url = process.env.MONGODB_URI
 // console.log('connecting to', url)
 
