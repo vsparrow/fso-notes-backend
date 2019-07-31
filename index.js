@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express');
 const app = express();
-const {mongopassword} = require('./password')
+// const {mongopassword} = require('./password')
 
 
 //START middleware definitions
